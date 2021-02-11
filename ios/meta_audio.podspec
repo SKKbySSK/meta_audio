@@ -5,13 +5,13 @@
 Pod::Spec.new do |s|
   s.name             = 'meta_audio'
   s.version          = '0.0.1'
-  s.summary          = 'A new flutter plugin project.'
+  s.summary          = 'meta_audio will give you an ability to parse metadata from audio files.'
   s.description      = <<-DESC
-A new flutter plugin project.
+meta_audio will give you an ability to parse metadata from audio files.
                        DESC
-  s.homepage         = 'http://example.com'
+  s.homepage         = 'https://github.com/SKKbySSK/meta_audio'
   s.license          = { :file => '../LICENSE' }
-  s.author           = { 'Your Company' => 'email@example.com' }
+  s.author           = { 'Kaisei Sunaga' => 'skkbyssk@gmail.com' }
   s.source           = { :path => '.' }
   s.source_files = 'Classes/**/*'
   s.dependency 'Flutter'
