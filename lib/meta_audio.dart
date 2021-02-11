@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:meta_audio/android/android_metadata_parser.dart';
 import 'package:meta_audio/apple/apple_metadata_parser.dart';
 import 'package:meta_audio/metadata.dart';
 import 'package:meta_audio/metadata_parser.dart';
@@ -14,6 +15,7 @@ class MetaAudio extends MetadataParser {
   static List<MetadataParser> get defaultParsers {
     return [
       if (Platform.isIOS) AppleMetadataParser(),
+      if (Platform.isAndroid) AndroidMetadataParser(),
     ];
   }
 

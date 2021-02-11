@@ -1,18 +1,45 @@
 # meta_audio
 
-A new flutter plugin project.
+meta_audio will give you an ability to parse metadata from audio files.
 
-## Getting Started
+## Example
 
-This project is a starting point for a Flutter
-[plug-in package](https://flutter.dev/developing-packages/),
-a specialized package that includes platform-specific implementation code for
-Android and/or iOS.
+| iOS | Android |
+| --- | --- |
+| ![](misc/ios_example.png) | ![](misc/android_example.jpg) |
 
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## How to Use meta_audio
 
-The plugin project was generated without specifying the `--platforms` flag, no platforms are currently supported.
-To add platforms, run `flutter create -t plugin --platforms <platforms> .` under the same
-directory. You can also find a detailed instruction on how to add platforms in the `pubspec.yaml` at https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms.
+To parse metadata you need to write these 2 lines.
+
+```dart
+final parser = MetaAudio();
+final metadata = await parser.parse('path/to/audio');
+```
+
+That's it!
+
+Now, You can read any [Supported Metadata](#Supported Metadata)
+
+## Supported Metadata
+
+| Metadata | iOS | Android |
+| --- | --- | --- |
+| Title | Yes | Yes |
+| Album | Yes | Yes |
+| Artist | Yes | Yes |
+| Genre | Yes | Yes |
+| Composer | Yes | Yes |
+| Duration | Yes | Yes |
+| Track Number | Yes | Yes |
+| Number of Tracks | Yes | Yes |
+| Year | Yes | Yes |
+| Artwork | Yes | Yes |
+
+## Supported Formats
+
+| Type | iOS | Android |
+| --- | --- | --- |
+| mp3 | Yes | Yes |
+| m4a | Yes | Yes |
+| flac | Yes | Yes |
