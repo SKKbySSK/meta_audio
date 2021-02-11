@@ -17,9 +17,7 @@ final parser = MetaAudio();
 final metadata = await parser.parse('path/to/audio');
 ```
 
-That's it!
-
-Now, You can read any [Supported Metadata](#Supported Metadata)
+That's it! Now you can read any [Supported Metadata](#supported-metadata)
 
 ## Supported Metadata
 
