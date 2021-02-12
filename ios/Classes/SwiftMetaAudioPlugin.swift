@@ -2,6 +2,8 @@ import Flutter
 import AVFoundation
 
 public class SwiftMetaAudioPlugin: NSObject, FlutterPlugin {
+  private let parsers: [AudioParser] = [AVAssetParser(), AudioFileParser()]
+  
   public static func register(with registrar: FlutterPluginRegistrar) {
     let channel = FlutterMethodChannel(name: "meta_audio", binaryMessenger: registrar.messenger())
     let instance = SwiftMetaAudioPlugin()
@@ -9,79 +11,53 @@ public class SwiftMetaAudioPlugin: NSObject, FlutterPlugin {
   }
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-    let arg = call.arguments as? String
+    let path = call.arguments as! String
+    let holder = ResultHolder(result: result)
+    
     switch call.method {
     case "metadata":
-      guard let path = arg else {
-        result(nil)
-        return
+      var data: [String: Any?] = [:]
+      for parser in parsers {
+        data = mergeData(data, parser.getMetadata(path: path))
       }
-      getMetadata(path: path, result: result)
+      
+      holder.success(data: data)
     case "artwork":
-      guard let path = arg else {
-        result(nil)
-        return
+      for parser in parsers {
+        guard let data = parser.getArtwork(path: path) else { continue }
+        holder.success(data: data)
       }
-      let artwork = getArtwork(path: path, result: result)
-      result(artwork)
+      
+      holder.success(data: nil)
     case "artwork_exists":
-      guard let path = arg else {
-        result(nil)
-        return
+      var data: [String: Any?] = [:]
+      for parser in parsers {
+        data = mergeData(data, parser.getMetadata(path: path))
       }
-      let artwork = getArtwork(path: path, result: result)
-      result(artwork != nil)
+      
+      holder.success(data: data["artwork"] ?? false)
     default:
       result(FlutterMethodNotImplemented)
     }
   }
   
-  private func getAudioProperty<Result>(path: String, result: @escaping FlutterResult, propertyId: AudioFilePropertyID, out: inout Result?) -> Bool {
-    let url = URL(fileURLWithPath: path)
+  private func mergeData(_ first: [String: Any?], _ second: [String: Any?]) -> [String: Any?] {
+    var data: [String: Any?] = first
     
-    var fileID: AudioFileID? = nil
-    var status: OSStatus = AudioFileOpenURL(url as CFURL, .readPermission, 0, &fileID)
-
-    guard status == noErr, let audioFile = fileID else {
-      result(FlutterError(code: "ERR_OPEN", message: nil, details: status))
-      return false
+    for (key, value) in second {
+      if key == "artwork" {
+        if let available = value as? Bool, available {
+          data[key] = available
+        }
+      } else {
+        guard data[key] == nil else {
+          continue
+        }
+        
+        data[key] = value
+      }
     }
     
-    var dataSize = UInt32(MemoryLayout<Result?>.size(ofValue: out))
-    status = AudioFileGetProperty(audioFile, propertyId, &dataSize, &out)
-
-    guard status == noErr else {
-      result(FlutterError(code: "ERR_READ", message: nil, details: status))
-      return false
-    }
-    
-    AudioFileClose(audioFile)
-    return true
-  }
-  
-  private func getMetadata(path: String, result: @escaping FlutterResult) {
-    var dict: CFDictionary? = nil
-    guard getAudioProperty(path: path, result: result, propertyId: kAudioFilePropertyInfoDictionary, out: &dict) else { return }
-
-    guard let cfDict = dict else {
-      result(Dictionary<String, Any>())
-      return
-    }
-
-    let metaDict = NSDictionary(dictionary: cfDict)
-    result(metaDict)
-  }
-  
-  private func getArtwork(path: String, result: @escaping FlutterResult) -> NSData? {
-    var data: CFData? = nil
-    guard getAudioProperty(path: path, result: result, propertyId: kAudioFilePropertyAlbumArtwork, out: &data) else { return nil }
-    
-    guard let cfData = data else {
-      result(nil)
-      return nil
-    }
-    
-    let artworkData = cfData as NSData
-    return artworkData
+    return data
   }
 }

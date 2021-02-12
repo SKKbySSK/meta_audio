@@ -23,6 +23,7 @@ class MetaAudio extends MetadataParser {
 
   @override
   Future<Metadata> parse(String path, [Map<String, dynamic> options]) async {
+    assert(parsers != null);
     for (var parser in parsers) {
       final metadata = await parser.parse(path, options);
       if (metadata != null) {

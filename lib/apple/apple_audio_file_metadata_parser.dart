@@ -1,26 +1,22 @@
 import 'package:meta_audio/metadata.dart';
 import 'package:meta_audio/native/native_metadata_parser.dart';
 
-class AppleMetadataParser extends NativeMetadataParser {
+class AppleAudioFileMetadataParser extends NativeMetadataParser {
   @override
   Future<Metadata> parse(String path, [Map<String, dynamic> options]) async {
-    final rawMetadata = await invokeGetMetadata(path);
-
-    final title = rawMetadata['title'] as String;
-    final album = rawMetadata['album'] as String;
-    final artist = rawMetadata['artist'] as String;
-    final genre = rawMetadata['genre'] as String;
-    final composer = rawMetadata['composer'] as String;
-    final year = rawMetadata['year'] as int;
+    final Map<dynamic, dynamic> rawMetadata = await invokeGetMetadata(path);
 
     Duration duration;
-    final durationSec = rawMetadata['duration'] as double;
-    if (durationSec != null) {
-      final durationUs = durationSec * 1e6;
-      duration = Duration(microseconds: durationUs.toInt());
+    final durationInSecStr = rawMetadata['approximate duration in seconds'];
+    if (durationInSecStr != null) {
+      final durationSec = double.tryParse(durationInSecStr);
+      if (durationSec != null) {
+        final durationUs = durationSec * 1e6;
+        duration = Duration(microseconds: durationUs.toInt());
+      }
     }
 
-    final trackValue = rawMetadata['track'];
+    final trackValue = rawMetadata['track number'];
     int trackNumber;
     int trackCount;
 
@@ -40,14 +36,20 @@ class AppleMetadataParser extends NativeMetadataParser {
       }
     }
 
+    final yearStr = rawMetadata['year'];
+    int year;
+    if (yearStr != null) {
+      year = int.tryParse(yearStr);
+    }
+
     return Metadata(
       path: path,
       duration: duration,
-      title: title,
-      album: album,
-      artist: artist,
-      genre: genre,
-      composer: composer,
+      title: rawMetadata['title'],
+      album: rawMetadata['album'],
+      artist: rawMetadata['artist'],
+      genre: rawMetadata['genre'],
+      composer: rawMetadata['composer'],
       trackNumber: trackNumber,
       trackCount: trackCount,
       year: year,
